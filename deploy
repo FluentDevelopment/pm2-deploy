@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 #
 # deploy(1) - Minimalistic shell script to deploy Git repositories.
@@ -95,7 +95,7 @@ version() {
 ssh_command() {
   local url="`config_get user`@`config_get host`"
   local unexpanded_key="`config_get key`"
-  local key="${unexpanded_key/#\~/$HOME}"
+  local key=$(echo "${unexpanded_key}" | sed -e "s#^\~#${HOME}#g")
   local forward_agent="`config_get forward-agent`"
   local port="`config_get port`"
   local needs_tty="`config_get needs_tty`"
@@ -125,7 +125,7 @@ runRemote() {
 
 runLocal() {
   echo "\"$@\"" >> $LOG
-  /usr/bin/env bash -c "$*"
+  ${SHELL} -c "exec $*"
 }
 
 #
@@ -134,7 +134,7 @@ runLocal() {
 
 run() {
   local host="`config_get host`"
-  if [[ $host == localhost ]]
+  if [ $host = localhost ]
   then
     runLocal $@
   else
@@ -204,7 +204,7 @@ setup() {
   local ref=`config_get ref`
   local branch=${ref##*/}
   hook_pre_setup || abort pre-setup hook failed
-  run "mkdir -p $path/{shared/{logs,pids},source}"
+  run "mkdir -p $path/shared/logs $path/shared/pids $path/source"
   test $? -eq 0 || abort setup paths failed
   log running setup
   log cloning $repo
