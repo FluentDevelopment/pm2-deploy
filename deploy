@@ -305,7 +305,7 @@ nth_deploy_commit() {
 
 list_deploys() {
   local path=`config_get path`
-  run "tac $path/.deploys | awk '{printf \"%d\t%s\n\", NR-1, \$0}'"
+  run "(tac $path/.deploys 2>/dev/null || tail -r $path/.deploys) | awk '{printf \"%d\t%s\n\", NR-1, \$0}'"
 }
 
 #
